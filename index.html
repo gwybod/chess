@@ -1,0 +1,256 @@
+<html>
+<head>
+<meta charset="UTF-8"> 
+<title>Chess using Pure javascript CSS and HTML</title>
+<style type="text/css">
+
+.chessboard {
+    width: 640px;
+    height: 640px;
+    margin: 20px;
+    border: 25px solid #333;
+}
+.black {
+    float: left;
+    width: 80px;
+    height: 80px;
+    background-color: #999;
+      font-size:50px;
+    text-align:center;
+    display: table-cell;
+    vertical-align:middle;
+}
+.white {
+    float: left;
+    width: 80px;
+    height: 80px;
+    background-color: #fff;
+    font-size:50px;
+    text-align:center;
+    display: table-cell;
+    vertical-align:middle;
+}
+
+</style>
+
+<script>
+
+function writediv(divID, text, clobber = false){
+	if (clobber) {	
+		document.getElementById(divID).innnerHTML = text; 
+	}else{
+		document.getElementById(divID).innerHTML += text;
+		document.getElementById(divID).scrollTop = document.getElementById(divID).scrollHeight;
+	}
+}
+function gppost(payload, target = './chess.php', outputdiv = 'output', statusdiv = 'status',  timeout = '5000', clobberOutputDiv = false){
+	if (payload === '') { document.getElementById(statusdiv).innerHTML += "No payload"; return;}
+	var xhttp = new XMLHttpRequest();
+	xhttp.timeout = timeout;
+	xhttp.onreadystatechange = function() {
+		switch(this.readyState){
+			case 1:
+				writediv(statusdiv, "Connection opened<br>");
+				break;
+			case 2:
+				writediv(statusdiv, "Command sent<br>");
+				break;
+			case 3:
+				writediv(statusdiv, "Receiving data<br>");
+				break;
+			case 4:
+				switch(this.status){
+					case 0:
+						writediv(statusdiv, "No reply?<br>");
+					case 403:
+						writediv(statusdiv, "Access denied<br>");
+					case 404:
+						writediv(statusdiv, "Target not valid<br>"); 
+					case 500:
+						writediv(statusdiv, "Server error<br>");
+						break;
+					case 200:
+						if (clobberOutputDiv) { 
+							document.getElementById(outputdiv).innerHTML = this.responseText; 
+						} else { 
+							document.getElementById(outputdiv).innerHTML += this.responseText;
+						}
+						writediv(statusdiv, "Success<br><br>");
+				}
+		}
+	};
+	xhttp.open('POST', target, true);
+	xhttp.setRequestHeader("Content-type", "text/plain;");
+   xhttp.send(payload);
+}
+
+function letterValue(str){
+    var anum={
+        A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8
+    }
+    if(str.length== 1) return anum[str] || ' ';
+    return str.split('').map(letterValue);
+}
+
+function checkpath(tox, toy, fromx, fromy){
+	
+	return true;
+}
+
+function validmove(piece, destination){
+	var from = (document.getElementById(piece)).parentNode.id;
+	var destNumx = letterValue(destination.charAt(0));
+	var destNumy = destination.charAt(1);
+	var fromNumx = letterValue(from.charAt(0));
+	var fromNumy = from.charAt(1);
+	var canTake = false;
+	var isEmpty = document.getElementById(destination).innerHTML === "";
+	var pieceColour = piece.charAt(0);
+	switch(piece.charAt(2)){
+		case "r":
+			if(destNumx==fromNumx) { checkpath(destNumy,fromNumy); }
+			if(destNumy==fromNumy) { checkpath(destNumx,fromNumx); }
+			break;
+		case "k":
+			alert("knight " + fromNumx+fromNumy + " to " + destNumx+destNumy);
+			break;
+		case "b":
+			alert("bishop " + fromNumx+fromNumy + " to " + destNumx+destNumy);
+			break;
+		case "1":
+		case "2":
+		case "3":
+		case "4":
+		case "5":
+		case "6":
+		case "7":
+		case "8":
+			if (piece.charAt(1) == "p") { 
+				// pawn logic here
+			} else { return false; }
+			break;
+		case "":
+			switch(piece.charAt(1)){
+			case "q":
+				//queen logic here
+				break;
+			case "k":
+				//king logic here
+				break;
+			default:
+				return false;
+			}
+		default:
+			return false;
+	}
+	var notInCheck = true;
+	// (isEmpty || canTake) && pathIsEmpty && notInCheck
+	if (isEmpty){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev, t) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+ 	if (validmove(data, t)){
+ 		ev.target.appendChild(document.getElementById(data));
+ 	} else {
+ 		writediv('status', "Invalid Move!<br>");
+ 	}
+}
+
+
+</script>
+
+</head>
+
+<body>
+
+<div class="chessboard">
+<!-- 1st -->
+<div id='A8' class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bqr" draggable="true" ondragstart="drag(event)">&#9820;</div></div>
+<div id="B8" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bqk" draggable="true" ondragstart="drag(event)">&#9822;</div></div>
+<div id="C8" class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bqb" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="D8" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bq" draggable="true" ondragstart="drag(event)">&#9819;</div></div>
+<div id="E8" class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bk" draggable="true" ondragstart="drag(event)">&#9818;</div></div>
+<div id="F8" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bkb" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="G8" class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bkk" draggable="true" ondragstart="drag(event)">&#9822;</div></div>
+<div id="H8" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bkr" draggable="true" ondragstart="drag(event)">&#9820;</div></div>
+<!-- 2nd -->
+<div id="A7" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp1" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="B7" class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp2" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="C7" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp3" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="D7" class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp4" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="E7" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp5" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="F7" class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp6" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="G7" class="black" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp7" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<div id="H7" class="white" ondrop="drop(event, this.id)" ondragover="allowDrop(event)"><div id="bp8" draggable="true" ondragstart="drag(event)">&#9821;</div></div>
+<!-- 3th -->
+<div id="A6" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="B6" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="C6" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="D6" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="E6" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="F6" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="G6" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="H6" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<!-- 4st -->
+<div id="A5" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="B5" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="C5" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="D5" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="E5" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="F5" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="G5" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="H5" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<!-- 5th -->
+<div id="A4" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="B4" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="C4" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="D4" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="E4" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="F4" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="G4" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="H4" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<!-- 6th -->
+<div id="A3" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="B3" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="C3" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="D3" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="E3" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="F3" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="G3" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<div id="H3" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"></div>
+<!-- 7th -->
+<div id="A2" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp1" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<div id="B2" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp2" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<div id="C2" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp3" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<div id="D2" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp4" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<div id="E2" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp5" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<div id="F2" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp6" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<div id="G2" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp7" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<div id="H2" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wp8" draggable="true" ondragstart="drag(event)">&#9817;</div></div>
+<!-- 8th -->
+<div id="A1" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wqr" draggable="true" ondragstart="drag(event)">&#9814;</div></div>
+<div id="B1" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wqk" draggable="true" ondragstart="drag(event)">&#9816;</div></div>
+<div id="C1" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wqb" draggable="true" ondragstart="drag(event)">&#9815;</div></div>
+<div id="D1" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wq" draggable="true" ondragstart="drag(event)">&#9813;</div></div>
+<div id="E1" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wk" draggable="true" ondragstart="drag(event)">&#9812;</div></div>
+<div id="F1" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wkb" draggable="true" ondragstart="drag(event)">&#9815;</div></div>
+<div id="G1" class="black" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wkk" draggable="true" ondragstart="drag(event)">&#9816;</div></div>
+<div id="H1" class="white" ondrop="drop(event, this.id);" ondragover="allowDrop(event);"><div id="wkr" draggable="true" ondragstart="drag(event)">&#9814;</div></div>
+</div>
+<div id="status"></div>
+<div id="output"></div>
+</body>
