@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset="UTF-8"> 
-<title>Chess using Pure javascript CSS and HTML</title>
+<title>Chess using Pure javascript, CSS and HTML</title>
 <style type="text/css">
 
 .chessboard {
@@ -10,148 +10,25 @@
     margin: 20px;
     border: 25px solid #333;
 }
-.black {
+.black, white {
     float: left;
     width: 80px;
     height: 80px;
-    background-color: #999;
-      font-size:50px;
-    text-align:center;
-    display: table-cell;
-    vertical-align:middle;
-}
-.white {
-    float: left;
-    width: 80px;
-    height: 80px;
-    background-color: #fff;
     font-size:50px;
     text-align:center;
     display: table-cell;
     vertical-align:middle;
 }
+.white {
+    background-color: #fff;
+}
+.white {
+    background-color: #999;
+}
 
 </style>
-
+<script src='chess.js'></script>
 <script>
-
-function writediv(divID, text, clobber = false){
-	if (clobber) {	
-		document.getElementById(divID).innnerHTML = text; 
-	}else{
-		document.getElementById(divID).innerHTML += text;
-		document.getElementById(divID).scrollTop = document.getElementById(divID).scrollHeight;
-	}
-}
-function gppost(payload, target = './chess.php', outputdiv = 'output', statusdiv = 'status',  timeout = '5000', clobberOutputDiv = false){
-	if (payload === '') { document.getElementById(statusdiv).innerHTML += "No payload"; return;}
-	var xhttp = new XMLHttpRequest();
-	xhttp.timeout = timeout;
-	xhttp.onreadystatechange = function() {
-		switch(this.readyState){
-			case 1:
-				writediv(statusdiv, "Connection opened<br>");
-				break;
-			case 2:
-				writediv(statusdiv, "Command sent<br>");
-				break;
-			case 3:
-				writediv(statusdiv, "Receiving data<br>");
-				break;
-			case 4:
-				switch(this.status){
-					case 0:
-						writediv(statusdiv, "No reply?<br>");
-					case 403:
-						writediv(statusdiv, "Access denied<br>");
-					case 404:
-						writediv(statusdiv, "Target not valid<br>"); 
-					case 500:
-						writediv(statusdiv, "Server error<br>");
-						break;
-					case 200:
-						if (clobberOutputDiv) { 
-							document.getElementById(outputdiv).innerHTML = this.responseText; 
-						} else { 
-							document.getElementById(outputdiv).innerHTML += this.responseText;
-						}
-						writediv(statusdiv, "Success<br><br>");
-				}
-		}
-	};
-	xhttp.open('POST', target, true);
-	xhttp.setRequestHeader("Content-type", "text/plain;");
-   xhttp.send(payload);
-}
-
-function letterValue(str){
-    var anum={
-        A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8
-    }
-    if(str.length== 1) return anum[str] || ' ';
-    return str.split('').map(letterValue);
-}
-
-function checkpath(tox, toy, fromx, fromy){
-	
-	return true;
-}
-
-function validmove(piece, destination){
-	var from = (document.getElementById(piece)).parentNode.id;
-	var destNumx = letterValue(destination.charAt(0));
-	var destNumy = destination.charAt(1);
-	var fromNumx = letterValue(from.charAt(0));
-	var fromNumy = from.charAt(1);
-	var canTake = false;
-	var isEmpty = document.getElementById(destination).innerHTML === "";
-	var pieceColour = piece.charAt(0);
-	switch(piece.charAt(2)){
-		case "r":
-			if(destNumx==fromNumx) { checkpath(destNumy,fromNumy); }
-			if(destNumy==fromNumy) { checkpath(destNumx,fromNumx); }
-			break;
-		case "k":
-			alert("knight " + fromNumx+fromNumy + " to " + destNumx+destNumy);
-			break;
-		case "b":
-			alert("bishop " + fromNumx+fromNumy + " to " + destNumx+destNumy);
-			break;
-		case "1":
-		case "2":
-		case "3":
-		case "4":
-		case "5":
-		case "6":
-		case "7":
-		case "8":
-			if (piece.charAt(1) == "p") { 
-				// pawn logic here
-			} else { return false; }
-			break;
-		case "":
-			switch(piece.charAt(1)){
-			case "q":
-				//queen logic here
-				break;
-			case "k":
-				//king logic here
-				break;
-			default:
-				return false;
-			}
-		default:
-			return false;
-	}
-	var notInCheck = true;
-	// (isEmpty || canTake) && pathIsEmpty && notInCheck
-	if (isEmpty){
-		return true;
-	} else {
-		return false;
-	}
-}
-
 function allowDrop(ev) {
     ev.preventDefault();
 }
